@@ -1,4 +1,4 @@
-"""Thin wrapper that runs the ADK agent for a single Yemot turn."""
+"""עטיפה דקה שמריצה את סוכן ה-ADK עבור תור שיחה בודד בימות."""
 
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
@@ -17,10 +17,10 @@ _runner = Runner(
 
 
 async def ask_agent(call_id: str, user_text: str) -> str:
-    """Send the caller's text to the agent and return the final spoken reply.
+    """שולח את טקסט המתקשר לסוכן ומחזיר את התשובה הסופית להקראה.
 
-    The Yemot call id is used as both user id and session id so that repeated
-    calls within the same phone call continue the same conversation.
+    מזהה השיחה של ימות משמש גם כ-user id וגם כ-session id, כך
+    שפניות חוזרות באותה שיחת טלפון ממשיכות את אותה שיחה עם הסוכן.
     """
     session = await _session_service.get_session(
         app_name=APP_NAME, user_id=call_id, session_id=call_id

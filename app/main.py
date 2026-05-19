@@ -1,7 +1,8 @@
-"""FastAPI service: Yemot HaMashiach webhook -> ADK business-finder agent.
+"""שירות FastAPI: webhook של ימות המשיח -> סוכן ה-ADK לאיתור עסקים.
 
-Deployed to Cloud Run. Point a Yemot API extension at the `/yemot` URL.
-Yemot sends call params as the query string and expects a Yemot-DSL line back.
+השירות נפרס ל-Cloud Run. יש לכוון שלוחת API בימות המשיח לכתובת `/yemot`.
+ימות שולחת את פרמטרי השיחה כ-query string ומצפה לקבל בחזרה שורת תגובה
+בפורמט (DSL) של ימות.
 """
 
 from fastapi import FastAPI, Request
@@ -15,12 +16,13 @@ app = FastAPI(title="Yemot Business Finder Agent")
 
 @app.get("/healthz")
 def healthz() -> dict:
+    # בדיקת בריאות עבור Cloud Run / ניטור.
     return {"status": "ok"}
 
 
 @app.api_route("/yemot", methods=["GET", "POST"])
 async def yemot(request: Request) -> PlainTextResponse:
-    # Yemot uses GET (query string); accept POST form too for flexibility.
+    # ימות עובדת ב-GET (query string); מקבלים גם POST form לגמישות.
     params = dict(request.query_params)
     if request.method == "POST":
         try:
@@ -31,10 +33,10 @@ async def yemot(request: Request) -> PlainTextResponse:
 
     intent = extract_intent(params)
 
-    # First hit of the call: no spoken intent yet -> ask for it by voice.
+    # הפנייה הראשונה בשיחה: אין עדיין כוונה מדוברת -> מבקשים אותה בקול.
     if not intent:
         return PlainTextResponse(ask_for_intent())
 
-    # We have the caller's request: let the agent understand & match businesses.
+    # יש לנו את בקשת המתקשר: הסוכן מבין את הכוונה ומאתר עסקים מתאימים.
     answer = await ask_agent(call_id(params), intent)
     return PlainTextResponse(say_and_hangup(answer))

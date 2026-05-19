@@ -1,4 +1,4 @@
-"""ADK agent that understands a caller's business-search intent."""
+"""סוכן ADK שמבין את כוונת המתקשר לחיפוש עסק."""
 
 from google.adk.agents import Agent
 

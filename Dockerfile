@@ -11,7 +11,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app/ ./app/
 COPY business_agent/ ./business_agent/
 
-# Cloud Run injects $PORT (default 8080).
+# Cloud Run מזריק את $PORT (ברירת מחדל 8080).
 ENV PORT=8080
 EXPOSE 8080
 

@@ -1,30 +1,29 @@
-"""Helpers for the Yemot HaMashiach (ימות המשיח) API protocol.
+"""פונקציות עזר לפרוטוקול ה-API של ימות המשיח.
 
-Yemot calls our endpoint with the call parameters as the query string. We
-answer with a single line of text in Yemot's response DSL. The two pieces we
-use here:
+ימות פונה לכתובת שלנו עם פרמטרי השיחה ב-query string. אנו מחזירים שורת
+טקסט אחת בפורמט (DSL) של ימות. שני המרכיבים שבשימוש כאן:
 
-* ``read``  - speak a prompt and collect input. We use speech recognition so
-  the caller can simply say what business they need. The recognized text comes
-  back on the next request under the variable name we chose.
-* ``id_list_message`` - speak a final text message; we then hang up.
+* ``read``  - להשמיע הודעה ולאסוף קלט. אנו משתמשים בזיהוי דיבור כדי
+  שהמתקשר פשוט יאמר איזה עסק הוא צריך. הטקסט המזוהה חוזר אלינו בפנייה
+  הבאה תחת שם המשתנה שבחרנו.
+* ``id_list_message`` - להשמיע הודעת טקסט סופית, ולאחריה מנתקים את השיחה.
 
-NOTE: Yemot's ``read`` parameter order differs slightly between system
-versions / extension settings. ``SPEECH_READ_TEMPLATE`` is intentionally a
-single place to adjust to match your Yemot extension docs.
+הערה: סדר הפרמטרים של ``read`` בימות עשוי להשתנות מעט בין גרסאות מערכת /
+הגדרות שלוחה. ``SPEECH_READ_TEMPLATE`` הוא בכוונה מקום יחיד לכוונון כדי
+להתאים לתיעוד השלוחה שלכם.
 """
 
-# {prompt} = TTS text, {var} = variable name the recognized speech is returned under.
+# {prompt} = טקסט להקראה (TTS), {var} = שם המשתנה שאליו יחזור הדיבור המזוהה.
 SPEECH_READ_TEMPLATE = "read=t-{prompt}={var},,voice,,,,,,,,,he-IL"
 
-# Variable name that will carry the recognized speech back to us.
+# שם המשתנה שיישא בחזרה אלינו את הדיבור המזוהה.
 INTENT_VAR = "intent"
 
 _PROMPT = "שלום, איזה עסק או שירות אתם מחפשים? דברו אחרי הצליל."
 
 
 def _sanitize(text: str) -> str:
-    """Strip characters that would break the Yemot response line."""
+    """מסיר תווים שעלולים לשבור את שורת התגובה של ימות."""
     if not text:
         return ""
     for ch in ("&", "=", ",", "\n", "\r", "\t"):
@@ -33,20 +32,20 @@ def _sanitize(text: str) -> str:
 
 
 def ask_for_intent() -> str:
-    """Response that asks the caller (by voice) what they are looking for."""
+    """תגובה ששואלת את המתקשר (בקול) מה הוא מחפש."""
     return SPEECH_READ_TEMPLATE.format(prompt=_sanitize(_PROMPT), var=INTENT_VAR)
 
 
 def say_and_hangup(message: str) -> str:
-    """Response that reads ``message`` to the caller and ends the call."""
+    """תגובה שמקריאה את ``message`` למתקשר ומסיימת את השיחה."""
     return f"id_list_message=t-{_sanitize(message)}&hangup=yes"
 
 
 def extract_intent(params: dict) -> str:
-    """Pull the recognized speech / typed intent out of Yemot's params."""
+    """שולף מתוך פרמטרי ימות את הדיבור המזוהה / הכוונה שהוקלדה."""
     return (params.get(INTENT_VAR) or "").strip()
 
 
 def call_id(params: dict) -> str:
-    """Stable per-call id, used to key the agent conversation session."""
+    """מזהה יציב לכל שיחה, משמש כמפתח לשיחת הסוכן (session)."""
     return (params.get("ApiCallId") or params.get("ApiPhone") or "anon").strip()

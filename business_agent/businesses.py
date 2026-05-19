@@ -1,4 +1,4 @@
-"""Personalized business list and the search tool exposed to the ADK agent."""
+"""רשימת העסקים המותאמת אישית והכלי לחיפוש שנחשף לסוכן ה-ADK."""
 
 import json
 from pathlib import Path
@@ -36,20 +36,20 @@ def _score(business: dict, query: str, category: str) -> int:
 
 
 def search_businesses(query: str, category: str = "") -> dict:
-    """Search the personalized business list for businesses matching the user's need.
+    """מחפש ברשימת העסקים המותאמת אישית עסקים שמתאימים לצורך של המשתמש.
 
-    Use this whenever the user is looking for a business, service or provider.
-    Extract the core need into `query` (free text, Hebrew) and, if the user
-    implied a clear business category (e.g. "מוסך", "אינסטלציה", "מסעדה"),
-    pass it in `category`.
+    יש להשתמש בכלי זה בכל פעם שהמשתמש מחפש עסק, שירות או נותן שירות.
+    יש לחלץ את עיקר הצורך אל `query` (טקסט חופשי בעברית), ואם המשתמש
+    רמז על קטגוריה ברורה (למשל "מוסך", "אינסטלציה", "מסעדה") יש
+    להעביר אותה ב-`category`.
 
     Args:
-        query: Free-text description of what the user is looking for, in Hebrew.
-        category: Optional business category to narrow the search.
+        query: תיאור חופשי בעברית של מה שהמשתמש מחפש.
+        category: קטגוריית עסק אופציונלית לצמצום החיפוש.
 
     Returns:
-        A dict with `count` and a `results` list of matching businesses
-        (name, category, city, phone, description), best match first.
+        מילון עם `count` ורשימת `results` של עסקים מתאימים
+        (name, category, city, phone, description), הטוב ביותר ראשון.
     """
     scored = []
     for business in _BUSINESSES:

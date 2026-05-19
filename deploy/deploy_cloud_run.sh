@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Deploy the Yemot business-finder ADK agent to Cloud Run.
+# פריסת סוכן ה-ADK לאיתור עסקים (ימות המשיח) ל-Cloud Run.
 #
-# Prereqs:
-#   * gcloud CLI installed and authenticated (`gcloud auth login`)
-#   * A GCP project with billing, Cloud Run + Vertex AI APIs enabled:
+# דרישות מוקדמות:
+#   * gcloud CLI מותקן ומחובר (`gcloud auth login`)
+#   * פרויקט GCP עם חיוב, ועם Cloud Run + Vertex AI מופעלים:
 #       gcloud services enable run.googleapis.com aiplatform.googleapis.com
 #
-# Usage:
+# שימוש:
 #   PROJECT_ID=my-proj REGION=us-central1 ./deploy/deploy_cloud_run.sh
 set -euo pipefail
 
@@ -16,7 +16,7 @@ SERVICE="${SERVICE:-yemot-business-finder}"
 
 gcloud config set project "${PROJECT_ID}"
 
-# Builds from the Dockerfile via Cloud Build and deploys to Cloud Run.
+# בונה מתוך ה-Dockerfile דרך Cloud Build ופורס ל-Cloud Run.
 gcloud run deploy "${SERVICE}" \
   --source . \
   --region "${REGION}" \
@@ -24,6 +24,6 @@ gcloud run deploy "${SERVICE}" \
   --set-env-vars "GOOGLE_GENAI_USE_VERTEXAI=TRUE,GOOGLE_CLOUD_PROJECT=${PROJECT_ID},GOOGLE_CLOUD_LOCATION=${REGION}"
 
 echo
-echo "Deployed. Yemot API URL:"
+echo "הפריסה הושלמה. כתובת ה-API לימות המשיח:"
 gcloud run services describe "${SERVICE}" --region "${REGION}" \
   --format='value(status.url)' | sed 's#$#/yemot#'
