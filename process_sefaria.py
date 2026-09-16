@@ -419,18 +419,14 @@ def assign(book: dict) -> tuple[str, str] | None:
         if c1 == "Rishonim on Tanakh":
             if c2 == "Rashi":
                 return "01", "רשי"
-            if c2 in ("Ibn Ezra",):
-                return "01", "אבן_עזרא"
-            if c2 in ("Radak", "Ralbag", "Ralbag Beur HaMilot"):
-                return "01", "רדק_ורלבג"
+            if c2 in ("Ibn Ezra", "Radak", "Ralbag", "Ralbag Beur HaMilot"):
+                return "01", "אבן_עזרא_רדק_ורלבג"
             if c2 in ("Abarbanel",):
                 return "01", "אברבנאל"
             return "01", "ראשונים_על_התנך"
         if c1 == "Acharonim on Tanakh":
-            if c2 == "Malbim":
-                return "01", "מלבים"
-            if c2 in ("Metzudat David", "Metzudat Zion"):
-                return "01", "מצודות"
+            if c2 in ("Malbim", "Metzudat David", "Metzudat Zion"):
+                return "01", "מלבים_ומצודות"
             if c2 in ("Chida", "Alshich"):
                 return "01", "חידא_ואלשיך"
             return "01", "אחרונים_על_התנך"
@@ -441,7 +437,7 @@ def assign(book: dict) -> tuple[str, str] | None:
     # ---- 02 משנה + תוספתא
     if c0 == "Mishnah":
         if c1.startswith("Seder "):
-            return "02", "משנה_" + CATEGORY_HE[c1].replace(" ", "_")
+            return "02", CATEGORY_HE[c1].replace(" ", "_")
         if c1 == "Rishonim on Mishnah":
             return "02", "ראשונים_על_המשנה"
         if c1 == "Acharonim on Mishnah":
@@ -457,27 +453,23 @@ def assign(book: dict) -> tuple[str, str] | None:
     # ---- 03 תלמוד בבלי
     if c0 == "Talmud" and c1 == "Bavli":
         if c2.startswith("Seder "):
-            return "03", "בבלי_" + CATEGORY_HE[c2].replace(" ", "_")
-        if c2 in ("Minor Tractates", "Commentary on Minor Tractates"):
-            return "03", "מסכתות_קטנות_ומפרשיהן"
+            return "03", CATEGORY_HE[c2].replace(" ", "_")
+        if c2 in ("Minor Tractates", "Commentary on Minor Tractates", "Guides"):
+            return "03", "מסכתות_קטנות_ומבואות"
         if c2 == "Rishonim on Talmud":
-            if c3 == "Rashi":
-                return "03", "רשי_על_התלמוד"
-            if c3 == "Tosafot":
-                return "03", "תוספות"
+            if c3 in ("Rashi", "Tosafot"):
+                return "03", "רשי_ותוספות"
             return "03", "ראשונים_על_התלמוד"
         if c2 == "Acharonim on Talmud":
             return "03", "אחרונים_על_התלמוד"
         if c2 == "Modern Commentary on Talmud":
             return "03", "פרשנות_מודרנית_על_התלמוד"
-        if c2 == "Guides":
-            return "03", "מבואות_לתלמוד"
         return "03", "שונות"
 
     # ---- 04 תלמוד ירושלמי
     if c0 == "Talmud" and c1 == "Yerushalmi":
         if c2.startswith("Seder "):
-            return "04", "ירושלמי_" + CATEGORY_HE[c2].replace(" ", "_")
+            return "04", CATEGORY_HE[c2].replace(" ", "_")
         if c2 == "Commentary":
             if c3 in ("Penei Moshe", "Mareh HaPanim"):
                 return "04", "פני_משה_ומראה_הפנים"
@@ -503,46 +495,43 @@ def assign(book: dict) -> tuple[str, str] | None:
     # ---- 10 שו"ת
     if c0 == "Responsa":
         if c1 in ("Geonim", "Rishonim"):
-            return "10", "שות_גאונים_וראשונים"
+            return "10", "גאונים_וראשונים"
         if c1 == "Acharonim":
-            return "10", "שות_אחרונים"
-        return "10", "שות_מודרני"
+            return "10", "אחרונים"
+        return "10", "מודרני"
 
     # ---- 07 הלכה ושולחן ערוך
     if c0 == "Halakhah":
         if c1 == "Tur":
-            if t == "Tur":
-                return "07", "טור"
-            if t in ("Beit Yosef",):
-                return "07", "בית_יוסף"
+            if t in ("Tur", "Beit Yosef"):
+                return "07", "טור_ובית_יוסף"
             return "07", "מפרשי_הטור"
-        if c1 == "Shulchan Arukh":
+        if c1 in ("Shulchan Arukh", "Shulchan Arukh HaRav"):
             if c2 != "Commentary":
-                return "07", "שולחן_ערוך"
-            if "Orach Chayim" in t:
+                return "07", "שולחן_ערוך_ושולחן_ערוך_הרב"
+            key = f"{c3} {t}"
+            if "Orach Chayim" in key or c3 in ("Mishnah Berurah", "Magen Avraham", "Machatzit HaShekel"):
                 return "07", "נושאי_כלים_אורח_חיים"
-            if "Yoreh De'ah" in t:
+            if "Yoreh De'ah" in key or "Yoreh Deah" in key:
                 return "07", "נושאי_כלים_יורה_דעה"
-            if "Even HaEzer" in t:
+            if "Even HaEzer" in key or c3 in ("Beit Shmuel", "Chelkat Mechokek"):
                 return "07", "נושאי_כלים_אבן_העזר"
-            if "Choshen Mishpat" in t:
+            if "Choshen Mishpat" in key or c3 in ("Urim VeTumim",):
                 return "07", "נושאי_כלים_חושן_משפט"
-            return "07", "נושאי_כלים_שונות"
-        if c1 == "Shulchan Arukh HaRav":
-            return "07", "שולחן_ערוך_הרב"
-        if c1 in ("Arukh HaShulchan", "Arukh HaShulchan HeAtid"):
+            return "07", "נושאי_כלים_אורח_חיים"  # ספרים רב-חלקיים (למשל קול יעקב: או"ח + יו"ד)
+        if t in ("Arukh HaShulchan", "Arukh HaShulchan HeAtid") or c1 in ("Arukh HaShulchan", "Arukh HaShulchan HeAtid"):
             return "07", "ערוך_השולחן"
-        if c1 in ("Kitzur Shulchan Arukh", "Chayyei Adam", "Chokhmat Adam", "Ben Ish Hai"):
+        if t in ("Kitzur Shulchan Arukh", "Chayyei Adam", "Chokhmat Adam", "Ben Ish Hai") or c1 in ("Kitzur Shulchan Arukh", "Chayyei Adam", "Chokhmat Adam", "Ben Ish Hai"):
             return "07", "קיצור_שולחן_ערוך_חיי_אדם_ובן_איש_חי"
-        if c1 in ("Rishonim", "Halakhot Gedolot", "Piskei Recanati"):
+        if c1 == "Rishonim" or t in ("Halakhot Gedolot", "Piskei Recanati") or c1 in ("Halakhot Gedolot", "Piskei Recanati"):
             return "07", "הלכה_ראשונים"
-        if c1 == "Sifrei Mitzvot":
+        if c1 == "Sifrei Mitzvot" or "Sefer HaMitzvot" in t or "Sefer Hamitzvot" in t or "Sefer Mitzvot" in t:
             return "07", "ספרי_מצוות"
         if c1 in ("Acharonim", "Commentary"):
             return "07", "הלכה_אחרונים"
         if c1 == "Modern":
             return "07", "הלכה_מודרנית"
-        return "07", "הלכה_שונות"
+        return "07", "הלכה_אחרונים"
 
     # ---- 08 מחשבה ומוסר
     if c0 == "Jewish Thought":
@@ -795,6 +784,7 @@ def main():
     for (fcode, volume), lst in sorted(plan.items(), key=lambda kv: (kv[0][0], min(ranks.get(b["title"], 10**9) for b in kv[1]))):
         folder = FOLDERS[fcode]
         vw = VolumeWriter(out_dir, folder, volume, max_bytes)
+        prev_group = None
         for b in lst:
             jp = local_json(b)
             if not jp.exists():
@@ -808,6 +798,12 @@ def main():
                 body = r.render()
                 if r.segments == 0:
                     continue
+                # כותרת-קבוצה כשתת-הקטגוריה משתנה בתוך הכרך (למשל "ספר מדע" במשנה תורה, שם המפרש בכרכי מפרשים)
+                cats = b.get("categories", [])
+                group = " / ".join(CATEGORY_HE.get(c, c) for c in cats[2:]) if len(cats) >= 3 else None
+                if group and group != prev_group:
+                    body = f"\n\n# ═══ {group} ═══\n" + body
+                prev_group = group
                 total_segments += r.segments
                 body_b = body.encode("utf-8")
                 vw.add_book(r.he_title, body_b, split_book_by_sections(body) if len(body_b) > max_bytes else None)
