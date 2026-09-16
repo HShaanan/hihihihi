@@ -1,0 +1,4 @@
+sefaria_notebooklm_export/
+sefaria_cache/
+__pycache__/
+*.pyc
