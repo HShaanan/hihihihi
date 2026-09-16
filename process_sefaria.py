@@ -144,6 +144,8 @@ _RE_FOOTNOTE = re.compile(
 )
 _RE_FOOTNOTE_ONLY = re.compile(r"<i[^<>]*class=[\"']?footnote[\"']?[^<>]*>(.*?)</i>", re.I | re.S)
 _RE_TAG = re.compile(r"<[^<>]*>")
+_RE_TAG_LOOSE = re.compile("</?[a-zA-Z][^>\\u0590-\\u05ff]*>")  # תגית פגומה (מכילה < פנימי) – רק אם אין בה אותיות עבריות
+_RE_TAG_FRAGMENT = re.compile(r"(?<![A-Za-z])/?(?:b|i|u|small|big|br|span|sup|sub|strong|em|a)>|</?(?:b|i|u|small|big|br|span|sup|sub|strong|em|a)(?![A-Za-z>])")
 _RE_WS = re.compile("[ \\t\\u00a0\\u2000-\\u200a\\u202f]+")
 _RE_MULTI_NL = re.compile(r"\n{3,}")
 _RE_SPACE_BEFORE_PUNCT = re.compile(r" +([,.:;!?׃])")
@@ -157,7 +159,14 @@ def clean_text(s: str) -> str:
     s = _RE_FOOTNOTE.sub(lambda m: f" (הערה: {m.group(1)})", s)
     s = _RE_FOOTNOTE_ONLY.sub(lambda m: f" (הערה: {m.group(1)})", s)
     s = _RE_TAG.sub("", s)
+    s = _RE_TAG_LOOSE.sub("", s)      # תגיות פגומות במקור, כגון <br<b> או </b<>>
+    s = _RE_TAG_FRAGMENT.sub("", s)   # שאריות כגון "b>" אחרי תגית פגומה
     s = html.unescape(s)
+    # תגיות שהיו מקודדות כישויות (&lt;b&gt;) הופכות לטקסט רק אחרי הפענוח – מנקים שוב
+    if "<" in s:
+        s = _RE_TAG.sub("", s)
+        s = _RE_TAG_LOOSE.sub("", s)
+        s = _RE_TAG_FRAGMENT.sub("", s)
     s = s.replace("\r", "")
     lines = [_RE_WS.sub(" ", ln).strip() for ln in s.split("\n")]
     s = "\n".join(ln for ln in lines if ln)
@@ -207,10 +216,16 @@ class Renderer:
 
     # ---- עזרים
     def _he_sections(self, node: dict | None, en_names: list[str] | None) -> list[str]:
-        if node and node.get("heSectionNames"):
-            return list(node["heSectionNames"])
-        en_names = en_names or (node or {}).get("sectionNames") or []
-        return [SECTION_HE.get(n, n) for n in en_names]
+        """שמות הרמות בעברית: מהסכמה (heSectionNames), ורמות ריקות מושלמות מהשם האנגלי או ברירת מחדל."""
+        en_names = list(en_names or (node or {}).get("sectionNames") or [])
+        he_names = list((node or {}).get("heSectionNames") or [])
+        n = max(len(en_names), len(he_names))
+        out = []
+        for i in range(n):
+            he = he_names[i] if i < len(he_names) else ""
+            en = en_names[i] if i < len(en_names) else ""
+            out.append(he or SECTION_HE.get(en, en) or "קטע")
+        return out
 
     def _addr_types(self, node: dict | None, en_names: list[str] | None) -> list[str]:
         if node and node.get("addressTypes"):
